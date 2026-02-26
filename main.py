@@ -175,5 +175,33 @@ def posts_by_user(username):
         top_tags=top_tags
     )
 
+from flaks.views import views
+
+class GenericListView(View):
+
+    def __init__(self, model, list_template='generic_list.html'):
+        self.model = model
+        self.list_template = list_template
+        self.columns = self.model.__mapper__.columns.keys()
+        #calling super python3
+        super(GenericListView, self).__init__()
+
+    def render_template(self, context):
+        return render_template(self.list_template, **context)
+
+    def get_objects(self):
+        return self.model.query.all()
+
+    def dispatch_request(self):
+        context = {'objects': self.get_objects(),'columns': self.columns}
+        return self.render_template(context)
+
+app.add_url_rule(
+    '/', view_func=GenericView.as_view(
+        'home', template='home.html'
+    )
+)
+
+
 if __name__ == '__main__':
     app.run()
